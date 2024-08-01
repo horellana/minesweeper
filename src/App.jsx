@@ -1,3 +1,4 @@
+import "./App.css";
 import { useState, useCallback } from 'react'
 
 function generateGrid(rows, cols) {
@@ -72,7 +73,9 @@ function Square({ size = 50, hasBomb, nearBombs }) {
     "backgroundColor": color,
     "cursor": "default",
     "color": "white",
-    "userSelect": "none"
+    "userSelect": "none",
+    "fontFamily": "'Roboto', sans-serif",
+    "fontWeight": 'bold',
   };
 
   return (

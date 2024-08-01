@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 function generateGrid(rows, cols) {
   const result = [];
@@ -33,39 +33,36 @@ function getAdjacentSquares(grid, i, j) {
   ];
 
   return directions
-    .map(([di, dj]) => {
-      return [i + di, j + dj];
-    })
-    .filter(([i, j]) => {
-      return i >= 0 && i < rows && j >= 0 && j <= cols;
-    })
+    .map(([di, dj]) => { return [i + di, j + dj]; })
+    .filter(([i, j]) => { return i >= 0 && i < rows && j >= 0 && j <= cols; })
     .map(([i, j]) => grid[i][j])
     .filter((s) => s);
 }
 
 function countAdjacentBombs(grid, i, j) {
-  console.log(getAdjacentSquares(grid, i, j));
-
   return getAdjacentSquares(grid, i, j)
     .filter((square) => square.hasBomb)
     .length;
 }
 
-function Square({ size = 50, hasBomb, nearBombs, onClick }) {
-  const [color, setColor] = useState("gray");
-  const [showAdjacent, setShowAdjacent] = useState(false);
+function Square({ size = 50, hasBomb, nearBombs, isClicked = false }) {
+  const [clicked, setClicked] = useState(isClicked);
 
-  const onClickHandler = useCallback(() => {
-    if (hasBomb) {
-      setColor("red");
-    }
-    else {
-      setColor("green");
-      setShowAdjacent(true);
-    }
-  });
+  const color = clicked
+    ? hasBomb
+      ? "red"
+      : "green"
+    : "gray";
 
-  const styles = {
+  const showAdjacent = clicked && nearBombs > 0
+    ? hasBomb
+      ? false
+      : true
+    : false;
+
+  const onClickHandler = useCallback(() => setClicked(true));
+
+  const style = {
     "height": `${size}px`,
     "width": `${size}px`,
     "display": "flex",
@@ -80,16 +77,14 @@ function Square({ size = 50, hasBomb, nearBombs, onClick }) {
   };
 
   return (
-    <div style={styles} onClick={onClickHandler}>
+    <div style={style} onClick={onClickHandler}>
       { showAdjacent ? nearBombs : "" }
     </div>
   );
 }
 
 const Grid = ({ rows = 5, cols = 5, size = 50, gap = "1px" }) => {
-  const [grid] = useState(generateGrid(rows, cols));
-
-  const gridStyle = {
+  const style = {
     display: 'grid',
     gridTemplateRows: `repeat(${rows}, ${size}px)`,
     gridTemplateColumns: `repeat(${cols}, ${size}px)`,
@@ -99,20 +94,27 @@ const Grid = ({ rows = 5, cols = 5, size = 50, gap = "1px" }) => {
   const onClickSquareHandler = useCallback((grid, i, j) => {
   });
 
-  const squares = [];
+  const squares = useMemo(() => {
+    const squares = [];
+    const grid = generateGrid(rows, cols);
 
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      squares.push(<Square
-                     key={`${i}-${j}`}
-                     size={size}
-                     nearBombs={countAdjacentBombs(grid, i, j)}
-                     hasBomb={grid[i][j].hasBomb}
-                     onClick={ () => onClickSquareHandler(grid, i, j) }/>);
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        squares.push(<Square
+                       key={`${i}-${j}`}
+                       size={size}
+                       nearBombs={countAdjacentBombs(grid, i, j)}
+                       hasBomb={grid[i][j].hasBomb}
+                       onClick={ () => onClickSquareHandler(grid, i, j) }/>);
+      }
     }
-  }
 
-  return <div style={gridStyle}>{squares}</div>;
+    return squares;
+  });
+
+  return <div style={style}>
+           {squares}
+         </div>;
 };
 
 function App() {

@@ -108,10 +108,15 @@ const Grid = ({ rows = 5, cols = 5, size = 50, gap = "1px" }) => {
 };
 
 function App() {
+  const styles = {
+    "display": "flex",
+    "justifyContent": "center",
+  };
+
   return (
-    <>
+    <div style={styles}>
       <Grid rows={8} cols={8} gap={"2px"}/>
-    </>
+    </div>
   )
 }
 

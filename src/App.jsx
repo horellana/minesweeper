@@ -51,9 +51,16 @@ function countAdjacentBombs(grid, i, j) {
 
 function Square({ size = 50, hasBomb, nearBombs }) {
   const [color, setColor] = useState("gray");
+  const [showAdjacent, setShowAdjacent] = useState(false);
 
   const onClickHandler = useCallback(() => {
-    setColor(hasBomb ? "red" : "green");
+    if (hasBomb) {
+      setColor("red");
+    }
+    else {
+      setColor("green");
+      setShowAdjacent(true);
+    }
   });
 
   const styles = {
@@ -70,7 +77,7 @@ function Square({ size = 50, hasBomb, nearBombs }) {
 
   return (
     <div style={styles} onClick={onClickHandler}>
-      { nearBombs }
+      { showAdjacent ? nearBombs : "" }
     </div>
   );
 }

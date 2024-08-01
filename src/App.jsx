@@ -17,12 +17,10 @@ function generateGrid(rows, cols) {
   return result;
 }
 
-function countAdjacentBombs(grid, i, j) {
+function getAdjacentSquares(grid, i, j) {
   const rows = grid.length;
   const cols = grid[0].length;
-  let bombCount = 0;
 
-  // Define the relative positions of adjacent cells (8 directions)
   const directions = [
     [-1, -1], // Top-left
     [-1, 0],  // Top
@@ -34,23 +32,26 @@ function countAdjacentBombs(grid, i, j) {
     [1, 1],   // Bottom-right
   ];
 
-  // Iterate through all possible adjacent positions
-  for (const [di, dj] of directions) {
-    const ni = i + di;
-    const nj = j + dj;
-
-    // Check if the adjacent position is within bounds
-    if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
-      if (grid[ni][nj].hasBomb) {
-        bombCount++;
-      }
-    }
-  }
-
-  return bombCount;
+  return directions
+    .map(([di, dj]) => {
+      return [i + di, j + dj];
+    })
+    .filter(([i, j]) => {
+      return i >= 0 && i < rows && j >= 0 && j <= cols;
+    })
+    .map(([i, j]) => grid[i][j])
+    .filter((s) => s);
 }
 
-function Square({ size = 50, hasBomb, nearBombs }) {
+function countAdjacentBombs(grid, i, j) {
+  console.log(getAdjacentSquares(grid, i, j));
+
+  return getAdjacentSquares(grid, i, j)
+    .filter((square) => square.hasBomb)
+    .length;
+}
+
+function Square({ size = 50, hasBomb, nearBombs, onClick }) {
   const [color, setColor] = useState("gray");
   const [showAdjacent, setShowAdjacent] = useState(false);
 
@@ -95,6 +96,9 @@ const Grid = ({ rows = 5, cols = 5, size = 50, gap = "1px" }) => {
     gap,
   };
 
+  const onClickSquareHandler = useCallback((grid, i, j) => {
+  });
+
   const squares = [];
 
   for (let i = 0; i < rows; i++) {
@@ -103,7 +107,8 @@ const Grid = ({ rows = 5, cols = 5, size = 50, gap = "1px" }) => {
                      key={`${i}-${j}`}
                      size={size}
                      nearBombs={countAdjacentBombs(grid, i, j)}
-                     hasBomb={grid[i][j].hasBomb}/>);
+                     hasBomb={grid[i][j].hasBomb}
+                     onClick={ () => onClickSquareHandler(grid, i, j) }/>);
     }
   }
 
